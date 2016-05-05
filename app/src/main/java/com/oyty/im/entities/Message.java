@@ -6,6 +6,8 @@ import android.os.Parcelable;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+import com.oyty.im.base.BaseApplication;
+import com.oyty.im.controller.ConversationController;
 
 import java.util.ArrayList;
 
@@ -158,16 +160,47 @@ public class Message implements Parcelable {
         isRead = read;
     }
 
-    public static Message test(String id, String selfId, String targetId) {
+    public static Message test(String id, String selfId, String targetId, MsgStatus msgStatus) {
         Message message = new Message();
         message.set_id(id);
         message.setContent("content:" + id);
-        message.setStatus(MsgStatus.ING);
+        message.setStatus(msgStatus);
         message.setType(MsgType.PLAIN);
         message.setTimestamp(System.currentTimeMillis());
         message.setSenderId(selfId);
         message.setReceiverId(targetId);
         return message;
+    }
+
+    public Conversation copyTo() {
+        Conversation conversation = new Conversation();
+        conversation.setContent(getContent());
+        conversation.setStatus(getStatus());
+        conversation.setTimestamp(getTimestamp());
+        conversation.setType(getType());
+        // 对方发给我的
+        if (!getSenderId().equals(BaseApplication.SELF_ID)) {
+            conversation.setTargetId(getSenderId());
+            conversation.setTargetName(getSender_name());
+            conversation.setTargetPicture(getSender_picture());
+            Conversation tmp = ConversationController.queryById(conversation.getTargetId());
+            if (tmp != null) {
+                if(tmp.getTimestamp() == conversation.getTimestamp()){
+                    conversation.setUnreadNum(tmp.getUnreadNum());
+                }else {
+                    conversation.setUnreadNum(tmp.getUnreadNum()+1);
+                }
+            }else {
+                conversation.setUnreadNum(1);
+            }
+        } else {// 我发出的消息
+            conversation.setTargetId(getReceiverId());
+            conversation.setTargetName(getReceiver_name());
+            conversation.setTargetPicture(getReceiver_picture());
+            Conversation tmp = ConversationController.queryById(conversation.getTargetId());
+            conversation.setUnreadNum(tmp == null ? 0 : tmp.getUnreadNum());
+        }
+        return conversation;
     }
 
     @Override

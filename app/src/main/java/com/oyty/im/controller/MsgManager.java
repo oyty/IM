@@ -1,9 +1,6 @@
 package com.oyty.im.controller;
 
-import android.os.Handler;
-
 import com.oyty.im.entities.Message;
-import com.oyty.im.entities.MsgStatus;
 
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -36,22 +33,8 @@ public class MsgManager {
     PublishSubject<Message> publishSubject = PublishSubject.create();
     private final Subject<Message, Message> bus = new SerializedSubject<>(publishSubject);
 
-    public void handlePush(String content) {
-        Message msg = new Message();
-        bus.onNext(msg);
-    }
-
     public void sendMessage(final Message message) {
-        message.setStatus(MsgStatus.ING);
         bus.onNext(message);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                message.setStatus(MsgStatus.DONE);
-                bus.onNext(message);
-            }
-        }, 5000);
-
     }
 
     public void register(final ReceiveCallback receiveCallback) {

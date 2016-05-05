@@ -5,7 +5,11 @@ import android.database.sqlite.SQLiteDatabase;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.table.TableUtils;
 import com.oyty.im.base.BaseApplication;
+import com.oyty.im.entities.Conversation;
+import com.oyty.im.entities.Message;
+import com.oyty.im.util.LogUtil;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -56,7 +60,13 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
-
+        try {
+            TableUtils.createTableIfNotExists(connectionSource, Message.class);
+            TableUtils.createTableIfNotExists(connectionSource, Conversation.class);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            LogUtil.getLogger().e(LOG_TAG, "Unable to create databases ");
+        }
     }
 
     @Override

@@ -10,8 +10,8 @@ import java.sql.SQLException;
  */
 public class MsgHelper {
 
-    public static Dao<Message, Integer> getDao() throws SQLException {
-        return DatabaseHelper.getInstance().getDao(Message.class);
-    }
+
+
+
 
 }
